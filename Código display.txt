@@ -1,0 +1,55 @@
+#include <xc.h>
+#define _XTAL_FREQ 20000000
+
+const unsigned char DISPLAY[10] = {
+    
+    0b11111111, // 0
+    0b00001100, // 1
+    0b00110111, // 2
+    0b00011111, // 3
+    0b00001100, // 4
+    0b00011011, // 5
+    0b00111011, // 6
+    0b00001110, // 7
+    0b11111111, // 8
+    0b00011110  // 9
+};
+
+const unsigned char DISPLAYE[10] = {
+    0b00000001, // 0
+    0b00000000, // 1
+    0b00000010, // 2
+    0b00000010, // 3
+    0b00000011, // 4
+    0b00000011, // 5
+    0b00000011, // 6
+    0b00000000, // 7
+    0b11111111, // 8
+    0b00000011  // 9
+};
+
+void main(void) {
+    
+    TRISA = 0b00000000;  
+    TRISB = 0b11111111; 
+    TRISE = 0b00000000;
+  
+    
+    unsigned char counter = 0;
+
+    while (1){
+        
+        if(PORTBbits.RB7 == 1){
+            counter++;
+            if(counter == 10) counter = 0;
+
+            PORTA = DISPLAY[counter];
+            PORTE = DISPLAYE[counter];
+
+
+            
+            while(PORTBbits.RB7 == 1); 
+            __delay_ms(1000);
+        }
+    }
+}
