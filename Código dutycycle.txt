@@ -1,0 +1,71 @@
+#include <xc.h>
+#define _XTAL_FREQ 200000000
+
+void pwm_init(void){ //1khx frecuencia del pwm modificar esta funcion 
+    TRISC = 0b00000000; // Puerto C como salidaaaaaaaaaa
+    CCP1CON = 0b00001111; // Configuración mod o PWM y limpiamos 2 bits del duty cycle 
+    CCPR1L = 0b00000000; // Se limpian 8 bits de duty cycle 
+    PR2 = 249; 
+    T2CON = 0b00000101; // Encendiendo el timer 2 y prescaler de 4 
+}
+
+void set_percent(unsigned char percent){
+    if (percent>100){
+        percent = 100;
+    }
+    if (percent<=0){
+        percent = 0;
+    }
+ 
+    unsigned int max_counts = (unsigned int)(4U*(PR2+1));// INT es de 16 bits char es solo para 256 pq es de 8 bits
+    unsigned int dc = (unsigned int)((unsigned long)percent*max_counts/100UL);// unsigned long es de 32 bits s
+    CCPR1L = (unsigned char)(dc>>2);
+    CCP1CONbits.CCP1X = (dc>>1)&1;
+    CCP1CONbits.CCP1Y = dc&1;
+}
+    
+
+
+void main(void) {
+    TRISB = 0b11111111;
+    TRISA = 0b00000000;
+    unsigned char counter = 0;
+    pwm_init();
+    
+    
+    while (1){
+        
+        if (counter>=100){
+            counter = 100;
+        }
+        
+        if (counter <=0){
+            counter = 0;
+       
+        }
+       
+        if (PORTBbits.RB0 == 1){ // CLOCKWISE
+            PORTA = 0b00000001;
+        
+        }
+        if (PORTBbits.RB1 == 1){//reveers
+            PORTA = 0b00000010;
+            
+        }
+        if (PORTBbits.RB2 == 1){//aument
+            counter++;
+            __delay_ms(20);
+            set_percent(counter);
+        }    
+        if (PORTBbits.RB3 == 1){//disminuye
+            counter--;
+            __delay_ms(20);
+            set_percent(counter);
+        }
+        if (PORTBbits.RB4==1){ // paro
+            __delay_ms(20);
+            set_percent(0);
+        }
+        
+    }
+    }
